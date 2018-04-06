@@ -8,6 +8,10 @@ using Discord;
 using CommunityBot.Configuration;
 using CommunityBot.Handlers;
 using CommunityBot.Helpers;
+using Microsoft.Extensions.DependencyInjection;
+using Discord.Commands;
+using CommunityBot.Features.GlobalAccounts;
+using CommunityBot.Features.Audio;
 
 namespace CommunityBot
 {
@@ -21,19 +25,17 @@ namespace CommunityBot
 
         public async Task StartAsync()
         {
-            var discordSocketConfig = new DiscordSocketConfig()
-            {
-                LogLevel = LogSeverity.Verbose
-            };
+            _client = CreateClient();
 
-            _client = new DiscordSocketClient(discordSocketConfig);
+            var serviceProvider = ConfigureServices();
+
             _client.Log += Logger.Log;
             _client.Ready += Timers.StartTimer;
             _client.ReactionAdded += OnReactionAdded;
             _client.MessageReceived += MessageRewardHandler.HandleMessageRewards;
             // Subscribe to other events here.
 
-            await InitializeCommandHandler();
+            await serviceProvider.GetRequiredService<CommandHandler>().InitializeAsync(serviceProvider);
             await AttemptLogin();
             await _client.StartAsync();
             await Task.Delay(-1);
@@ -57,12 +59,6 @@ namespace CommunityBot
             return Task.CompletedTask;
         }
 
-        private async Task InitializeCommandHandler()
-        {
-            _handler = new CommandHandler();
-            await _handler.InitializeAsync(_client);
-        }
-
         private async Task AttemptLogin()
         {
             try
@@ -75,6 +71,25 @@ namespace CommunityBot
                 Console.ReadKey();
                 Environment.Exit(0);
             }
+        }
+
+        private DiscordSocketClient CreateClient()
+        {
+            return new DiscordSocketClient(
+                new DiscordSocketConfig()
+                {
+                    LogLevel = LogSeverity.Verbose
+                });
+        }
+
+        private IServiceProvider ConfigureServices()
+        {
+            return new ServiceCollection()
+                .AddSingleton(_client)
+                .AddSingleton<CommandService>()
+                .AddSingleton<CommandHandler>()
+                .AddSingleton<AudioService>()
+                .BuildServiceProvider();
         }
     }
 }

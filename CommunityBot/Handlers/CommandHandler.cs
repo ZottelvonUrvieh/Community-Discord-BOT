@@ -11,16 +11,20 @@ namespace CommunityBot.Handlers
     {
         private DiscordSocketClient _client;
         private CommandService _service;
-
-        public async Task InitializeAsync(DiscordSocketClient client)
+        private IServiceProvider _serviceProvider;
+        public CommandHandler(DiscordSocketClient client, CommandService cmdService)
         {
             _client = client;
-            _service = new CommandService();
+            _service = cmdService;
+        }
+
+        public async Task InitializeAsync(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
             await _service.AddModulesAsync(Assembly.GetEntryAssembly());
             _client.MessageReceived += HandleCommandAsync;
             _client.UserJoined += _client_UserJoined;
             _client.UserLeft += _client_UserLeft;
-            Global.Client = client;
         }
 
         private async Task _client_UserJoined(SocketGuildUser user)
@@ -44,7 +48,7 @@ namespace CommunityBot.Handlers
                 var cmdSearchResult = _service.Search(context, argPos);
                 if (cmdSearchResult.Commands.Count == 0) return;
 
-                var executionTask = _service.ExecuteAsync(context, argPos);
+                var executionTask = _service.ExecuteAsync(context, argPos, _serviceProvider);
 
                 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 executionTask.ContinueWith(task =>

@@ -11,7 +11,7 @@ namespace CommunityBot.Modules
 {
     public class Misc : ModuleBase<SocketCommandContext>
     {
-        private CommandService _service;
+        private readonly CommandService _service;
         
         public Misc(CommandService service)
         {
