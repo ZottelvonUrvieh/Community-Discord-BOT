@@ -11,6 +11,8 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -133,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Features\AudioService.cs" />
     <Compile Include="Features\Blogs\BlogItem.cs" />
     <Compile Include="Features\Economy\Daily.cs" />
     <Compile Include="Features\Economy\Slots.cs" />
@@ -149,6 +152,7 @@
     <Compile Include="Helpers\ActionResult.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Modules\Admin.cs" />
+    <Compile Include="Modules\Audio.cs" />
     <Compile Include="Modules\Basics.cs" />
     <Compile Include="Modules\Blogs.cs" />
     <Compile Include="Modules\Economy.cs" />
