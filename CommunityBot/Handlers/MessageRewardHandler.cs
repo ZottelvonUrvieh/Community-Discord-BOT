@@ -14,8 +14,7 @@ namespace CommunityBot.Handlers
         {
             var msg = s as SocketUserMessage;
 
-            if (msg == null) return;
-            if (msg.Channel == msg.Author.GetOrCreateDMChannelAsync()) return;            
+            if (msg == null) return;         
             if (msg.Author.IsBot) return;
             
             var userAcc = GlobalUserAccounts.GetUserAccount(msg.Author.Id);

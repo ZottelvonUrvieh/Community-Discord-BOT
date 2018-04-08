@@ -20,8 +20,8 @@ namespace CommunityBot.Handlers
             _service = new CommandService();
             await _service.AddModulesAsync(Assembly.GetEntryAssembly());
             _client.MessageReceived += HandleCommandAsync;
-            _client.UserJoined += _client_UserJoined;
-            _client.UserLeft += _client_UserLeft;
+            // _client.UserJoined += _client_UserJoined;
+            // _client.UserLeft += _client_UserLeft;
             Global.Client = client;
         }
         

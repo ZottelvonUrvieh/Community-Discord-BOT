@@ -15,7 +15,7 @@ namespace CommunityBot.Helpers
             // Look for expired reminders every 3 seconds
             Global.TaskHander.AddRepeatedTask("Reminders", 3000, new ElapsedEventHandler(CheckReminders));
             // Help Message every 2 hours
-            Global.TaskHander.AddRepeatedTask("Help Message", 7200000, new ElapsedEventHandler(SendHelpMessage));
+            // Global.TaskHander.AddRepeatedTask("Help Message", 7200000, new ElapsedEventHandler(SendHelpMessage));
             return Task.CompletedTask;
         }
 
