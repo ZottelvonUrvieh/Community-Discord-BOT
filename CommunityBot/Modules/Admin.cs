@@ -149,6 +149,15 @@ namespace CommunityBot.Modules
             await Context.Message.DeleteAsync();
         }
 
+        [Command("Game"), Alias("ChangeGame", "SetGame")]
+        [Remarks("Change what the bot is currently playing.")]
+        [RequireOwner]
+        public async Task SetGame([Remainder] string gamename)
+        {
+            await Context.Client.SetGameAsync(gamename);
+            await ReplyAsync($"Changed game to {Context.Client.CurrentUser.Game?.Name}");
+        }
+
         public async Task<IRole> GetMuteRole(IGuild guild)
         {
             const string defaultMuteRoleName = "Muted";
@@ -190,8 +199,8 @@ namespace CommunityBot.Modules
             return muteRole;
         }
 
-        [Command("setAvatar")]
-        [RequireUserPermission(GuildPermission.Administrator)]
+        [Command("setAvatar"), Remarks("Sets the bots Avatar")]
+        [RequireOwner]
         public async Task SetAvatar(string link)
         {
             var s = Context.Message.DeleteAsync();

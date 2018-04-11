@@ -5,7 +5,7 @@ using Discord.Commands;
 
 namespace CommunityBot.Modules
 {
-    [Group("Tasks")] 
+    [Group("Tasks"), Remarks("Settings for the repeated task that run in the background")] 
     [Alias("Task", "T")]
     public class RepeatedTasks : ModuleBase<SocketCommandContext>
     {

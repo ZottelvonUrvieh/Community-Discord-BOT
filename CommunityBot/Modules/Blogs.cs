@@ -12,11 +12,11 @@ using Newtonsoft.Json;
 
 namespace CommunityBot.Modules
 {
-    [Group("Blog")]
+    [Group("Blog"), Summary("Enables you to create a block that people can subscribe to so they don't miss out if you publish a new one")]
     public class Blogs : ModuleBase<SocketCommandContext>
     {
         private static readonly string blogFile = "blogs.json";
-        [Command("Create")]
+        [Command("Create"), Remarks("Create a new named block")]
         public async Task Create(string name)
         {
             await Context.Message.DeleteAsync();
@@ -47,7 +47,7 @@ namespace CommunityBot.Modules
             }
         }
 
-        [Command("Post")]
+        [Command("Post"), Remarks("Publish a new post to one of your named blocks")]
         public async Task Post(string name, [Remainder]string post)
         {
             await Context.Message.DeleteAsync();
@@ -85,7 +85,7 @@ namespace CommunityBot.Modules
             }
         }
 
-        [Command("Subscribe")]
+        [Command("Subscribe"), Remarks("Subscribe to a named blog to receive a message when a new post gets published")]
         public async Task Subscribe(string name)
         {
             await Context.Message.DeleteAsync();
@@ -95,7 +95,7 @@ namespace CommunityBot.Modules
             await Context.Channel.SendMessageAsync("", false, embed);
         }
 
-        [Command("Unsubscribe")]
+        [Command("Unsubscribe"), Remarks("Remove a subscription from a named block")]
         public async Task UnSubscribe(string name)
         {
             await Context.Message.DeleteAsync();

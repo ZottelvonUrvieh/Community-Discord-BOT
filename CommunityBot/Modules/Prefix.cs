@@ -11,10 +11,12 @@ using Discord.Commands;
 
 namespace CommunityBot.Modules
 {
-    [Group("Prefix"), Alias("Prefixes")]
+    [Group("Prefix"), Alias("Prefixes"), Summary("Setting for the Bots prefix on this server")]
+    [RequireContext(ContextType.Guild)]
     public class Prefix : ModuleBase<SocketCommandContext>
     {
         [Command("add"), Alias("set"), RequireUserPermission(GuildPermission.Administrator)]
+        [Remarks("Adds a prefix to the list of prefixes")]
         public async Task AddPrefix([Remainder] string prefix)
         {
             var guildAcc = GlobalGuildAccounts.GetGuildAccount(Context.Guild.Id);
@@ -29,7 +31,8 @@ namespace CommunityBot.Modules
             await ReplyAsync(response);
         }
 
-        [Command("remove"), RequireUserPermission(GuildPermission.Administrator)]
+        [Command("remove"), Remarks("Removes a prefix from the list of prefixes")] 
+        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task RemovePrefix([Remainder] string prefix)
         {
             var guildAcc = GlobalGuildAccounts.GetGuildAccount(Context.Guild.Id);
@@ -44,7 +47,7 @@ namespace CommunityBot.Modules
             await ReplyAsync(response);
         }
 
-        [Command("list")]
+        [Command("list"), Remarks("Show all possible prefixes for this server")]
         public async Task ListPrefixes()
         {
             var prefixes = GlobalGuildAccounts.GetGuildAccount(Context.Guild.Id).Prefixes;
