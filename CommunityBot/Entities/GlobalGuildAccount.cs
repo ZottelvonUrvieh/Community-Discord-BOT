@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CommunityBot.Features.PublicLists;
 using CommunityBot.Features.RoleAssignment;
 
 namespace CommunityBot.Entities
@@ -20,6 +21,8 @@ namespace CommunityBot.Entities
         public Modules.ServerBots.GuildData BotData { get; set; }
 
         public RoleByPhraseSettings RoleByPhraseSettings { get; set; } = new RoleByPhraseSettings();
+
+        public Dictionary<string, Dictionary<string, string>> PublicLists { get; set; } = new Dictionary<string, Dictionary<string, string>>();
 
         /* Add more values to store */
     }

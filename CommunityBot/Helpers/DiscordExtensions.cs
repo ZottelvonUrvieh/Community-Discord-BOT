@@ -74,6 +74,8 @@ namespace CommunityBot.Helpers
             catch (TaskCanceledException) { }
             // Remove the function from the 
             Global.Client.MessageReceived -= OnMessageReceived;
+            if (responseMessage == null)
+                await channel.SendMessageAsync("The message awaiter timed out...");
             return responseMessage;
 
             Task OnMessageReceived(SocketMessage message)
