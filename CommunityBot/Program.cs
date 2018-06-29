@@ -1,80 +1,90 @@
 ﻿using Discord.WebSocket;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using CommunityBot.Configuration;
-using CommunityBot.Features.Trivia;
 using CommunityBot.Handlers;
-using CommunityBot.Helpers;
-using CommunityBot.Modules;
+using Microsoft.Extensions.DependencyInjection;
+using Discord.Commands;
 
 namespace CommunityBot
 {
     class Program
     {
         private DiscordSocketClient _client;
-        private CommandHandler _handler;
+        private IServiceProvider _serviceProvider;
 
         static void Main(string[] args)
         => new Program().StartAsync(args).GetAwaiter().GetResult();
 
         public async Task StartAsync(string[] args)
-        {
-            if (args.Contains("-h")) Global.Headless = true;
-
-            var discordSocketConfig = new DiscordSocketConfig()
-            {
-                LogLevel = LogSeverity.Verbose
-            };
+        {      
+            var discordSocketConfig = HandleCommandlineArguments(args);
+            if (discordSocketConfig == null) return;
 
             _client = new DiscordSocketClient(discordSocketConfig);
 
-            if (!Global.Headless)
-            {
-                _client.Log += Logger.Log;
-            }
+            _serviceProvider = ConfigureServices();
+            
+            _serviceProvider.GetRequiredService<DiscordEventHandler>().InitDiscordEvents();
+            await _serviceProvider.GetRequiredService<CommandHandler>().InitializeAsync();
 
-            _client.Ready += RepeatedTaskFunctions.InitRepeatedTasks;
-            _client.ReactionAdded += OnReactionAdded;
-            _client.MessageReceived += MessageRewardHandler.HandleMessageRewards;
-            // Subscribe to other events here.
-            _client.Ready += ServerBots.Init;
-
-            // Use argument token if available
-            if (args.Any()) BotSettings.config.Token = args.First();
-
-            await InitializeCommandHandler();
             while (!await AttemptLogin()){}
+
             await _client.StartAsync();
+
             await Task.Delay(-1);
         }
 
-        private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction reaction)
+        private DiscordSocketConfig HandleCommandlineArguments(string[] args)
         {
-            if (!reaction.User.Value.IsBot)
-            {
-                var msgList = Global.MessagesIdToTrack ?? new Dictionary<ulong, string>();
-                if (msgList.ContainsKey(reaction.MessageId))
-                {
-                    if (reaction.Emote.Name == "➕")
-                    {
-                        var item = msgList.FirstOrDefault(k => k.Key == reaction.MessageId);
-                        var embed = BlogHandler.SubscribeToBlog(reaction.User.Value.Id, item.Value);
-                    }
-                }
-                // Checks if the rection is associated with a running game and if it is 
-                // from the same user who ran the command - if so it handles it
-                await TriviaGames.HandleReactionAdded(cache, reaction);
-            }
-        }
+            if (args.Length > 0) args = args[0].Split(" ");
 
-        private async Task InitializeCommandHandler()
-        {
-            _handler = new CommandHandler();
-            await _handler.InitializeAsync(_client);
+            // Help argument handling -help / -h / -info / -i
+            if (args.Any(arg => new string[]{"-help", "-h", "-info", "-i"}.Contains(arg)))
+            {
+                Console.WriteLine(   
+                    "Possible arguments you can provide are:\n" +
+                    "-help | -h | -info -i  : shows this help\n" +
+                    "-hl                    : run in headless mode (no output to console)\n" +
+                    "-vb                    : run with verbose discord logging\n" +
+                    "-token=<token>         : run with specific token instead of the saved one in bot configs\n" +
+                    "-cs=<number>           : message cache size per channel (defaults to 0)"
+                );
+                return null;
+            }
+
+            // Headless argument handling -hl
+            if (args.Contains("-hl")) Global.Headless = true;
+
+            // Verbose argument handling -vb
+            var logLevel = LogSeverity.Info;
+            if (args.Contains("-vb"))
+                logLevel = LogSeverity.Verbose;
+            
+            // Cachesize argument handling -cs=<cacheSize>
+            var chacheSize = 0;
+            if (args.Any(arg => arg.StartsWith("-cs=")))
+            {
+                var numberString = args.FirstOrDefault(arg => arg.StartsWith("-cs=")).Replace("-cs=", "");
+                int.TryParse(numberString, out chacheSize);
+            }
+
+             // Token argument handling -token=YOUR.TOKEN.HERE
+            var tokenString = args.FirstOrDefault(arg => arg.StartsWith("-token="));
+            if (tokenString is null == false) 
+            {
+                BotSettings.config.Token = tokenString.Replace("-token=", "");
+            }
+
+            return new DiscordSocketConfig()
+            {
+                LogLevel = logLevel,
+                MessageCacheSize = chacheSize,
+                AlwaysDownloadUsers = true
+            };
         }
 
         private async Task<bool> AttemptLogin()
@@ -119,6 +129,16 @@ namespace CommunityBot
             Global.WriteColoredLine("(not trying again closes the application)\n", ConsoleColor.Yellow);
 
             return Console.ReadKey().Key == ConsoleKey.Y;
+        }
+
+        private IServiceProvider ConfigureServices()
+        {
+            return new ServiceCollection()
+                .AddSingleton(_client)
+                .AddSingleton<CommandService>()
+                .AddSingleton<CommandHandler>()
+                .AddSingleton<DiscordEventHandler>()
+                .BuildServiceProvider();
         }
     }
 }

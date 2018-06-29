@@ -9,23 +9,24 @@ using CommunityBot.Providers;
 
 namespace CommunityBot.Handlers
 {
-    internal class CommandHandler
+    public class CommandHandler
     {
         private DiscordSocketClient _client;
         private CommandService _service;
 
-        public async Task InitializeAsync(DiscordSocketClient client)
+        public CommandHandler(DiscordSocketClient client, CommandService commandService)
         {
             _client = client;
-            _service = new CommandService();
+            _service = commandService;
+        }
+
+        public async Task InitializeAsync()
+        {
             await _service.AddModulesAsync(Assembly.GetEntryAssembly());
-            _client.MessageReceived += HandleCommandAsync;
-            _client.UserJoined += _client_UserJoined;
-            _client.UserLeft += _client_UserLeft;
-            Global.Client = client;
+            Global.Client = _client;
         }
         
-        private async Task HandleCommandAsync(SocketMessage s)
+        public async Task HandleCommandAsync(SocketMessage s)
         {
             if (!(s is SocketUserMessage msg)) return;
             if (msg.Channel is SocketDMChannel) return;
@@ -66,33 +67,11 @@ namespace CommunityBot.Handlers
             var success = prefixes.Any(pre =>
             {
                 if (!context.Message.Content.StartsWith(pre)) return false;
-                tmpArgPos = pre.Length + 1;
+                tmpArgPos = pre.Length;
                 return true;
             });
             argPos = tmpArgPos;
             return success;
-        }
-
-        private async Task _client_UserJoined(SocketGuildUser user)
-        {
-            var dmChannel = await user.GetOrCreateDMChannelAsync();
-            var possibleMessages = GlobalGuildAccounts.GetGuildAccount(user.Guild.Id).WelcomeMessages;
-            var messageString = possibleMessages[Global.Rng.Next(possibleMessages.Count)];
-            messageString = messageString.ReplacePlacehoderStrings(user);
-            if (string.IsNullOrEmpty(messageString)) return;
-            await dmChannel.SendMessageAsync(messageString);
-        }
-
-        private async Task _client_UserLeft(SocketGuildUser user)
-        {
-            var guildAcc = GlobalGuildAccounts.GetGuildAccount(user.Guild.Id);
-            if (guildAcc.AnnouncementChannelId == 0) return;
-            if (!(_client.GetChannel(guildAcc.AnnouncementChannelId) is SocketTextChannel channel)) return;
-            var possibleMessages = guildAcc.LeaveMessages;
-            var messageString = possibleMessages[Global.Rng.Next(possibleMessages.Count)];
-            messageString = messageString.ReplacePlacehoderStrings(user);
-            if (string.IsNullOrEmpty(messageString)) return;
-            await channel.SendMessageAsync(messageString);
         }
     }
 }

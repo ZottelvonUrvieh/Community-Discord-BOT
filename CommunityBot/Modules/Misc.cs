@@ -195,28 +195,28 @@ namespace CommunityBot.Modules
 
     [Command("Addition")]
         [Summary("Adds 2 numbers together.")]
-        public async Task AddAsync(int num1, int num2)
+        public async Task AddAsync(float num1, float num2)
         {
             await ReplyAsync($"The Answer To That Is: {num1 + num2}");
         }
         
         [Command("Subtract")]
         [Summary("Subtracts 2 numbers.")]
-        public async Task SubstractAsync(int num1, int num2)
+        public async Task SubstractAsync(float num1, float num2)
         {
             await ReplyAsync($"The Answer To That Is: {num1 - num2}");
         }
 
         [Command("Multiply")]
         [Summary("Multiplys 2 Numbers.")]
-        public async Task MultiplyAsync(int num1, int num2)
+        public async Task MultiplyAsync(float num1, float num2)
         {
             await ReplyAsync($"The Answer To That Is {num1 * num2}");
         }
 
         [Command("Divide")]
         [Summary("Divides 2 Numbers.")]
-        public async Task DivideAsync(int num1, int num2)
+        public async Task DivideAsync(float num1, float num2)
         {
             await ReplyAsync($"The Answer To That Is: {num1 / num2}");
         }

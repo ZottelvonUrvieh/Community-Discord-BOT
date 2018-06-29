@@ -65,8 +65,9 @@ namespace CommunityBot.Features.RoleAssignment
         /// <exception cref="RelationAlreadyExistsException"></exception>
         public static void CreateRelation(this RoleByPhraseSettings settings, int phraseIndex, int roleIdIndex)
         {
-            if (phraseIndex < 0 || phraseIndex > settings.Phrases.Count - 1) throw new ArgumentException($"phraseIndex '{phraseIndex}' is outside of the Phrases list's scope.");
-            if (roleIdIndex < 0 || roleIdIndex > settings.RolesIds.Count - 1) throw new ArgumentException($"roleIdIndex '{roleIdIndex}' is outside of the Roles IDs list's scope.");
+            settings.Phrases.ValidateIndex(phraseIndex);
+            settings.RolesIds.ValidateIndex(roleIdIndex);
+
             if (settings.Relations.Any(r => r.PhraseIndex == phraseIndex && r.RoleIdIndex == roleIdIndex)) throw new RelationAlreadyExistsException();
 
             settings.Relations.Add(new RoleByPhraseRelation { PhraseIndex = phraseIndex, RoleIdIndex = roleIdIndex });
@@ -79,7 +80,7 @@ namespace CommunityBot.Features.RoleAssignment
         /// <param name="phraseIndex">Index of the phrase to remove</param>
         public static void RemovePhraseByIndex(this RoleByPhraseSettings settings, int phraseIndex)
         {
-            if (phraseIndex < 0 || phraseIndex > settings.Phrases.Count - 1) throw new ArgumentException($"phraseIndex '{phraseIndex}' is outside of the Phrases list's scope.");
+            settings.Phrases.ValidateIndex(phraseIndex);
 
             var affectedElementsOldIds = new List<int>();
 
@@ -107,7 +108,7 @@ namespace CommunityBot.Features.RoleAssignment
         /// <param name="roleIdIndex">Index of the RoleID to remove</param>
         public static void RemoveRoleIdByIndex(this RoleByPhraseSettings settings, int roleIdIndex)
         {
-            if (roleIdIndex < 0 || roleIdIndex > settings.RolesIds.Count - 1) throw new ArgumentException($"roleIdIndex '{roleIdIndex}' is outside of the RoleIDs list's scope.");
+            settings.RolesIds.ValidateIndex(roleIdIndex);
 
             var affectedElementsOldIds = new List<int>();
 
@@ -138,12 +139,18 @@ namespace CommunityBot.Features.RoleAssignment
         /// <exception cref="RelationNotFoundException"></exception>
         public static void RemoveRelation(this RoleByPhraseSettings settings, int phraseIndex, int roleIdIndex)
         {
-            if (phraseIndex < 0 || phraseIndex > settings.Phrases.Count - 1) throw new ArgumentException($"phraseIndex '{phraseIndex}' is outside of the Phrases list's scope.");
-            if (roleIdIndex < 0 || roleIdIndex > settings.RolesIds.Count - 1) throw new ArgumentException($"roleIdIndex '{roleIdIndex}' is outside of the Roles IDs list's scope.");
+            settings.Phrases.ValidateIndex(phraseIndex);
+            settings.RolesIds.ValidateIndex(roleIdIndex);
+
             if (!settings.Relations.Any(r => r.PhraseIndex == phraseIndex && r.RoleIdIndex == roleIdIndex)) throw new RelationNotFoundException();
 
             settings.Relations = settings.Relations
                 .Where(r => r.PhraseIndex != phraseIndex || r.RoleIdIndex != roleIdIndex).ToList();
+        }
+
+        private static void ValidateIndex<T>(this IEnumerable<T> collection, int index)
+        {
+            if (index < 0 || index > collection.Count() - 1) throw new ArgumentException($"Index {index} is outside of the scope of {nameof(collection)}.");
         }
     }
 }

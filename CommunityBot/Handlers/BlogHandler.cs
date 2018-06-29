@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityBot.Configuration;
 using CommunityBot.Features.Blogs;
 using Discord;
+using Discord.WebSocket;
 using Newtonsoft.Json;
 
 namespace CommunityBot.Handlers
@@ -62,6 +64,19 @@ namespace CommunityBot.Handlers
             else
             {
                 return EmbedHandler.CreateEmbed("Blog :x:", $"There is no Blog with the name {blogname}", EmbedHandler.EmbedMessageType.Error);
+            }
+        }
+
+        public static async Task ReactionAdded(SocketReaction reaction)
+        {
+            var msgList = Global.MessagesIdToTrack ?? new Dictionary<ulong, string>();
+            if (msgList.ContainsKey(reaction.MessageId))
+            {
+                if (reaction.Emote.Name == "➕")
+                {
+                    var item = msgList.FirstOrDefault(k => k.Key == reaction.MessageId);
+                    var embed = BlogHandler.SubscribeToBlog(reaction.User.Value.Id, item.Value);
+                }
             }
         }
     }

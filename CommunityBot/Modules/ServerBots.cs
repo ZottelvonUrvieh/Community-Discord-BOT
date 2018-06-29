@@ -117,12 +117,10 @@ namespace CommunityBot.Modules
                 StoreData(guild.Id);
             }
 
-            Global.Client.JoinedGuild += JoinedGuild;
-
             return Task.CompletedTask;
         }
 
-        private static Task JoinedGuild(SocketGuild guild)
+        public static Task JoinedGuild(SocketGuild guild)
         {
             AddGuild(guild.Id);
             return Task.CompletedTask;
